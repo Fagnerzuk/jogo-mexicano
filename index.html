@@ -86,6 +86,41 @@ input {
 input::placeholder {
     color: #555;
 }
+    
+/* TEXTO DO JOGO (nome do jogador e rodada) */
+#jogo h2 {
+    color: black;
+}
+
+/* TEXTO DA TELA DE RESULTADO */
+#resultado h1,
+#resultado h2 {
+    color: black;
+}
+
+/* GARANTE QUE QUALQUER TEXTO DENTRO DAS TELAS NÃO FIQUE BRANCO */
+#inicio, #jogo, #resultado {
+    color: black;
+}
+
+/* INPUT (já tinha, mas reforçando bonito) */
+input {
+    color: black;
+    background: white;
+    border: 2px solid black;
+}
+
+/* PLACEHOLDER */
+input::placeholder {
+    color: #555;
+}
+
+#jogo, #resultado {
+    background: rgba(255,255,255,0.85);
+    padding: 20px;
+    border-radius: 15px;
+    display: inline-block;
+}
 </style>
 </head>
 
