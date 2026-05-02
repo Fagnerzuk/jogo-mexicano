@@ -9,19 +9,38 @@ body {
     margin: 0;
     font-family: Arial;
     text-align: center;
-    color: white;
     overflow: hidden;
     background: linear-gradient(90deg, green 33%, white 33%, white 66%, red 66%);
 }
 
-h1 {
-    text-shadow: 2px 2px 4px black;
-}
-
+/* CONTAINERS AGORA OCUPAM A TELA TODA */
 .container {
-    margin-top: 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
+/* TEXTO PRETO */
+#inicio, #jogo, #resultado {
+    color: black;
+}
+
+/* INPUT */
+input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid black;
+    color: black;
+    background: white;
+}
+
+/* PLACEHOLDER */
+input::placeholder {
+    color: #555;
+}
+
+/* BOTÃO */
 button {
     padding: 15px 30px;
     margin: 10px;
@@ -33,8 +52,7 @@ button {
     cursor: pointer;
 }
 
-.hidden { display: none; }
-
+/* BARRA */
 .barra {
     width: 80%;
     height: 20px;
@@ -50,76 +68,15 @@ button {
     border-radius: 10px;
 }
 
+/* RANKING */
 #ranking {
     margin-top: 20px;
     color: black;
     font-weight: bold;
 }
 
-input {
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-}
-    /* INPUT (nome do jogador) */
-input {
-    color: black;
-    background: white;
-}
-
-/* TEXTO DA TELA INICIAL */
-#inicio p {
-    color: black;
-}
-
-/* RANKING */
-#ranking {
-    color: black;
-}
-
-/* GARANTIR QUE TEXTO DO RANKING NÃO FIQUE BRANCO */
 #ranking p, #ranking h3 {
     color: black;
-}
-
-/* PLACEHOLDER (texto "Seu nome") */
-input::placeholder {
-    color: #555;
-}
-    
-/* TEXTO DO JOGO (nome do jogador e rodada) */
-#jogo h2 {
-    color: black;
-}
-
-/* TEXTO DA TELA DE RESULTADO */
-#resultado h1,
-#resultado h2 {
-    color: black;
-}
-
-/* GARANTE QUE QUALQUER TEXTO DENTRO DAS TELAS NÃO FIQUE BRANCO */
-#inicio, #jogo, #resultado {
-    color: black;
-}
-
-/* INPUT (já tinha, mas reforçando bonito) */
-input {
-    color: black;
-    background: white;
-    border: 2px solid black;
-}
-
-/* PLACEHOLDER */
-input::placeholder {
-    color: #555;
-}
-
-#jogo, #resultado {
-    background: rgba(255,255,255,0.85);
-    padding: 20px;
-    border-radius: 15px;
-    display: inline-block;
 }
 </style>
 </head>
