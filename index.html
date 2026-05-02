@@ -103,18 +103,17 @@ input {
 
 <script type="module">
 
-// 🔥 COLE SEU FIREBASE CONFIG AQUI
+// 🔥 FIREBASE CONFIG
 const firebaseConfig = {
     apiKey: "AIzaSyCXY0vSi86u1VIdl475Y2NKEzE8IBLcSig",
     authDomain: "jogo-mexicano.firebaseapp.com",
     projectId: "jogo-mexicano",
     storageBucket: "jogo-mexicano.firebasestorage.app",
     messagingSenderId: "435035483413",
-    appId: "1:435035483413:web:5cf16074b433d42ec04d1c",
-    measurementId: "G-6NVXR1EQSS"
-  };
+    appId: "1:435035483413:web:5cf16074b433d42ec04d1c"
+};
 
-// IMPORTS FIREBASE
+// IMPORTS
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -129,21 +128,26 @@ let meta = 120;
 
 function iniciar(){
     nome = document.getElementById("nome").value || "Jogador";
+
     document.getElementById("inicio").classList.add("hidden");
     document.getElementById("jogo").classList.remove("hidden");
-    document.getElementById("player").innerText = nome;
+
+    document.getElementById("player").innerText = "👤 " + nome;
+
     atualizar();
 }
 
 function atualizar(){
     let txt = "Rodada " + rodada;
     if(rodada >= 4) txt += " (x2)";
+
     document.getElementById("rodadaTexto").innerText = txt;
     document.getElementById("barra").style.width = (rodada-1)*20 + "%";
 }
 
 function jogar(valor){
     if(rodada >= 4) valor *= 2;
+
     total += valor;
     rodada++;
 
@@ -154,23 +158,45 @@ function jogar(valor){
     }
 }
 
-function finalizar(){
+async function finalizar(){
     document.getElementById("jogo").classList.add("hidden");
     document.getElementById("resultado").classList.remove("hidden");
 
-    document.getElementById("pontos").innerText = nome + " fez " + total;
+    document.getElementById("pontos").innerText = nome + " fez " + total + " pontos";
 
     if(total >= meta){
         document.getElementById("mensagem").innerText = "🏆 INCRÍVEL!";
-        document.getElementById("final").innerText = "Você ganhou!";
+        document.getElementById("final").innerText = "🎉 Você ganhou!";
     } else {
         document.getElementById("mensagem").innerText = "😢 Quase!";
         document.getElementById("final").innerText = "Tente novamente!";
     }
+
+    // 🔥 VERIFICAR RECORD
+    const maior = await pegarMaiorScore();
+
+    if(total > maior){
+        document.getElementById("final").innerText += " 🏆 NOVO RECORDE!";
+    }
 }
 
-// 🔥 RANKING ONLINE
+// 🔥 PEGAR MAIOR SCORE
+async function pegarMaiorScore(){
+    const querySnapshot = await getDocs(collection(db, "ranking"));
+
+    let maior = 0;
+
+    querySnapshot.forEach(doc => {
+        let pontos = doc.data().pontos;
+        if(pontos > maior) maior = pontos;
+    });
+
+    return maior;
+}
+
+// 🔥 SALVAR
 async function salvarRanking(){
+
     await addDoc(collection(db, "ranking"), {
         nome: nome,
         pontos: total
@@ -179,6 +205,7 @@ async function salvarRanking(){
     mostrarRanking();
 }
 
+// 🔥 MOSTRAR RANKING
 async function mostrarRanking(){
     const querySnapshot = await getDocs(collection(db, "ranking"));
 
@@ -192,8 +219,8 @@ async function mostrarRanking(){
 
     let html = "<h3>🏆 Ranking Online</h3>";
 
-    lista.slice(0,5).forEach(r=>{
-        html += `<p>${r.nome} - ${r.pontos}</p>`;
+    lista.slice(0,5).forEach((r, i)=>{
+        html += `<p>${i+1}º - ${r.nome} (${r.pontos})</p>`;
     });
 
     document.getElementById("ranking").innerHTML = html;
@@ -201,9 +228,11 @@ async function mostrarRanking(){
 
 mostrarRanking();
 
+// 🔄 RESET
 function reiniciar(){
     rodada = 1;
     total = 0;
+
     document.getElementById("resultado").classList.add("hidden");
     document.getElementById("inicio").classList.remove("hidden");
 }
