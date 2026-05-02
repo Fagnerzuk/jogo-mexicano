@@ -5,7 +5,6 @@
 <title>Tiro al Blanco</title>
 
 <style>
-
 body {
     margin: 0;
     font-family: Arial;
@@ -15,24 +14,12 @@ body {
     background: linear-gradient(90deg, green 33%, white 33%, white 66%, red 66%);
 }
 
-/* TÍTULO com efeito bonito */
 h1 {
     text-shadow: 2px 2px 4px black;
 }
 
-/* Textos normais sem bug */
-h2, p {
-    text-shadow: none;
-}
-
 .container {
     margin-top: 60px;
-    animation: fade 0.5s;
-}
-
-@keyframes fade {
-    from {opacity: 0; transform: scale(0.9);}
-    to {opacity: 1; transform: scale(1);}
 }
 
 button {
@@ -44,16 +31,10 @@ button {
     background: black;
     color: white;
     cursor: pointer;
-    transition: 0.3s;
-}
-
-button:hover {
-    transform: scale(1.1);
 }
 
 .hidden { display: none; }
 
-/* BARRA */
 .barra {
     width: 80%;
     height: 20px;
@@ -67,56 +48,29 @@ button:hover {
     width: 0%;
     background: yellow;
     border-radius: 10px;
-    transition: 0.4s;
 }
 
-/* CINEMA */
-.cinema {
-    animation: zoom 1s ease;
-}
-@keyframes zoom {
-    from {transform: scale(0.5); opacity: 0;}
-    to {transform: scale(1.2); opacity: 1;}
-}
-
-/* PARTÍCULAS */
-.particula {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: yellow;
-    animation: explodir 1s forwards;
-}
-
-@keyframes explodir {
-    to {
-        transform: translate(var(--x), var(--y));
-        opacity: 0;
-    }
-}
-
-/* RANKING */
 #ranking {
     margin-top: 20px;
     color: black;
-    text-shadow: none;
     font-weight: bold;
 }
 
+input {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+}
 </style>
 </head>
 
 <body>
 
-<audio id="click" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
-<audio id="win" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
-
-<!-- INÍCIO -->
 <div class="container" id="inicio">
     <h1>🎯 Tiro al Blanco</h1>
 
     <p>Digite seu nome:</p>
-    <input id="nome" placeholder="Seu nome">
+    <input id="nome">
 
     <br><br>
     <button onclick="iniciar()">Começar</button>
@@ -124,7 +78,6 @@ button:hover {
     <div id="ranking"></div>
 </div>
 
-<!-- JOGO -->
 <div class="container hidden" id="jogo">
     <h2 id="player"></h2>
     <h2 id="rodadaTexto"></h2>
@@ -139,35 +92,46 @@ button:hover {
     <button onclick="jogar(50)">Difícil (+50)</button>
 </div>
 
-<!-- RESULTADO -->
 <div class="container hidden" id="resultado">
     <h1 id="mensagem"></h1>
     <h2 id="pontos"></h2>
     <h2 id="final"></h2>
 
     <button onclick="salvarRanking()">Salvar no Ranking</button>
-    <button onclick="reiniciar()">Voltar ao Início</button>
+    <button onclick="reiniciar()">Voltar</button>
 </div>
 
-<script>
+<script type="module">
 
+// 🔥 COLE SEU FIREBASE CONFIG AQUI
+const firebaseConfig = {
+    apiKey: "AIzaSyCXY0vSi86u1VIdl475Y2NKEzE8IBLcSig",
+    authDomain: "jogo-mexicano.firebaseapp.com",
+    projectId: "jogo-mexicano",
+    storageBucket: "jogo-mexicano.firebasestorage.app",
+    messagingSenderId: "435035483413",
+    appId: "1:435035483413:web:5cf16074b433d42ec04d1c",
+    measurementId: "G-6NVXR1EQSS"
+  };
+
+// IMPORTS FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// JOGO
 let rodada = 1;
 let total = 0;
 let nome = "";
 let meta = 120;
 
-function som(id){
-    document.getElementById(id).play();
-}
-
 function iniciar(){
     nome = document.getElementById("nome").value || "Jogador";
-
     document.getElementById("inicio").classList.add("hidden");
     document.getElementById("jogo").classList.remove("hidden");
-
-    document.getElementById("player").innerText = "👤 " + nome;
-
+    document.getElementById("player").innerText = nome;
     atualizar();
 }
 
@@ -175,15 +139,11 @@ function atualizar(){
     let txt = "Rodada " + rodada;
     if(rodada >= 4) txt += " (x2)";
     document.getElementById("rodadaTexto").innerText = txt;
-
     document.getElementById("barra").style.width = (rodada-1)*20 + "%";
 }
 
 function jogar(valor){
-    som("click");
-
     if(rodada >= 4) valor *= 2;
-
     total += valor;
     rodada++;
 
@@ -196,62 +156,43 @@ function jogar(valor){
 
 function finalizar(){
     document.getElementById("jogo").classList.add("hidden");
+    document.getElementById("resultado").classList.remove("hidden");
 
-    let tela = document.getElementById("resultado");
-    tela.classList.remove("hidden");
-    tela.classList.add("cinema");
-
-    document.getElementById("pontos").innerText = nome + " fez " + total + " pontos";
+    document.getElementById("pontos").innerText = nome + " fez " + total;
 
     if(total >= meta){
         document.getElementById("mensagem").innerText = "🏆 INCRÍVEL!";
-        document.getElementById("final").innerText = "🎉 Você ganhou!";
-        som("win");
-        explosao();
+        document.getElementById("final").innerText = "Você ganhou!";
     } else {
         document.getElementById("mensagem").innerText = "😢 Quase!";
         document.getElementById("final").innerText = "Tente novamente!";
     }
 }
 
-/* PARTÍCULAS */
-function explosao(){
-    for(let i=0;i<50;i++){
-        let p = document.createElement("div");
-        p.className = "particula";
-
-        p.style.left = "50%";
-        p.style.top = "50%";
-
-        p.style.setProperty('--x', (Math.random()*400-200)+"px");
-        p.style.setProperty('--y', (Math.random()*400-200)+"px");
-
-        document.body.appendChild(p);
-
-        setTimeout(()=>p.remove(),1000);
-    }
-}
-
-/* RANKING */
-function salvarRanking(){
-
-    let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
-
-    ranking.push({nome: nome, pontos: total});
-
-    ranking.sort((a,b)=> b.pontos - a.pontos);
-
-    localStorage.setItem("ranking", JSON.stringify(ranking));
+// 🔥 RANKING ONLINE
+async function salvarRanking(){
+    await addDoc(collection(db, "ranking"), {
+        nome: nome,
+        pontos: total
+    });
 
     mostrarRanking();
 }
 
-function mostrarRanking(){
-    let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+async function mostrarRanking(){
+    const querySnapshot = await getDocs(collection(db, "ranking"));
 
-    let html = "<h3>🏆 Ranking</h3>";
+    let lista = [];
 
-    ranking.slice(0,5).forEach(r=>{
+    querySnapshot.forEach(doc => {
+        lista.push(doc.data());
+    });
+
+    lista.sort((a,b)=> b.pontos - a.pontos);
+
+    let html = "<h3>🏆 Ranking Online</h3>";
+
+    lista.slice(0,5).forEach(r=>{
         html += `<p>${r.nome} - ${r.pontos}</p>`;
     });
 
@@ -263,7 +204,6 @@ mostrarRanking();
 function reiniciar(){
     rodada = 1;
     total = 0;
-
     document.getElementById("resultado").classList.add("hidden");
     document.getElementById("inicio").classList.remove("hidden");
 }
