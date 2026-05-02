@@ -13,31 +13,19 @@ body {
     background: linear-gradient(90deg, green 33%, white 33%, white 66%, red 66%);
 }
 
-/* CONTAINERS AGORA OCUPAM A TELA TODA */
+/* TELAS */
 .container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    margin-top: 60px;
 }
 
-/* TEXTO PRETO */
-#inicio, #jogo, #resultado {
-    color: black;
+/* ESSENCIAL (sem isso quebra o jogo) */
+.hidden {
+    display: none;
 }
 
-/* INPUT */
-input {
-    padding: 10px;
-    border-radius: 8px;
-    border: 2px solid black;
-    color: black;
-    background: white;
-}
-
-/* PLACEHOLDER */
-input::placeholder {
-    color: #555;
+/* TEXTO */
+h1 {
+    text-shadow: 2px 2px 4px black;
 }
 
 /* BOTÃO */
@@ -52,6 +40,22 @@ button {
     cursor: pointer;
 }
 
+/* INPUT VISÍVEL */
+input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid black;
+    color: black;
+    background: white;
+    width: 80%;
+    max-width: 300px;
+}
+
+/* PLACEHOLDER */
+input::placeholder {
+    color: #555;
+}
+
 /* BARRA */
 .barra {
     width: 80%;
@@ -60,7 +64,6 @@ button {
     margin: 20px auto;
     border-radius: 10px;
 }
-    
 
 .progresso {
     height: 100%;
