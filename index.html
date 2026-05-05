@@ -10,7 +10,7 @@ body {
     font-family: Arial;
     text-align: center;
     overflow: hidden;
-    background: linear-gradient(90deg, green 33%, white 33%, white 66%, red 66%);
+    background: linear-gradient(90deg, #006847 33%, #ffffff 33%, #ffffff 66%, #ce1126 66%);
 }
 
 /* TELAS */
@@ -18,14 +18,18 @@ body {
     margin-top: 60px;
 }
 
-/* ESSENCIAL (sem isso quebra o jogo) */
+/* ESSENCIAL */
 .hidden {
     display: none;
 }
 
-/* TEXTO */
+/* TEXTO ATUALIZADO */
 h1 {
-    text-shadow: 2px 2px 4px grey;
+    color: white;
+    -webkit-text-stroke: 1.5px black;
+    text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
+    font-size: 3.5em;
+    margin-bottom: 10px;
 }
 
 /* BOTÃO */
@@ -38,6 +42,12 @@ button {
     background: black;
     color: white;
     cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.1);
+    background: #333;
 }
 
 /* INPUT VISÍVEL */
@@ -49,11 +59,6 @@ input {
     background: white;
     width: 80%;
     max-width: 300px;
-}
-
-/* PLACEHOLDER */
-input::placeholder {
-    color: #555;
 }
 
 /* BARRA */
@@ -70,6 +75,7 @@ input::placeholder {
     width: 0%;
     background: yellow;
     border-radius: 10px;
+    transition: width 0.5s;
 }
 
 /* RANKING */
@@ -77,10 +83,6 @@ input::placeholder {
     margin-top: 20px;
     color: black;
     font-weight: bold;
-}
-
-#ranking p, #ranking h3 {
-    color: black;
 }
 </style>
 </head>
@@ -91,7 +93,7 @@ input::placeholder {
     <h1>🎯 Tiro al Blanco</h1>
 
     <p>Digite seu nome:</p>
-    <input id="nome">
+    <input id="nome" placeholder="Seu nome aqui...">
 
     <br><br>
     <button onclick="iniciar()">Começar</button>
@@ -116,43 +118,34 @@ input::placeholder {
 <div class="container hidden" id="resultado">
     <h1 id="mensagem"></h1>
     <h2 id="pontos"></h2>
-    <h2 id="final"></h2>
 
     <button onclick="salvarRanking()">Salvar no Ranking</button>
     <button onclick="reiniciar()">Voltar</button>
 </div>
 
-<!-- FIREBASE CDN (SEM MODULE) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
-
-// CONFIG
+// CONFIG FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyCXY0vSi86u1VIdl475Y2NKEzE8IBLcSig",
   authDomain: "jogo-mexicano.firebaseapp.com",
   projectId: "jogo-mexicano"
 };
 
-// INIT
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// JOGO
 let rodada = 1;
 let total = 0;
 let nome = "";
-let meta = 120;
 
 function iniciar(){
     nome = document.getElementById("nome").value || "Jogador";
-
     document.getElementById("inicio").classList.add("hidden");
     document.getElementById("jogo").classList.remove("hidden");
-
     document.getElementById("player").innerText = "👤 " + nome;
-
     atualizar();
 }
 
@@ -160,88 +153,52 @@ function atualizar(){
     let txt = "Rodada " + rodada;
     if(rodada >= 4) txt += " (x2)";
     document.getElementById("rodadaTexto").innerText = txt;
-
-    document.getElementById("barra").style.width = (rodada-1)*20 + "%";
+    document.getElementById("barra").style.width = (rodada-1)*25 + "%";
 }
 
 function jogar(valor){
     if(rodada >= 4) valor *= 2;
-
     total += valor;
     rodada++;
-
-    if(rodada > 5){
-        finalizar();
-    } else {
-        atualizar();
-    }
+    if(rodada > 5) finalizar(); else atualizar();
 }
 
 async function finalizar(){
     document.getElementById("jogo").classList.add("hidden");
     document.getElementById("resultado").classList.remove("hidden");
-
     document.getElementById("pontos").innerText = nome + " fez " + total + " pontos";
 
     let maior = 0;
-
     const snapshot = await db.collection("ranking").get();
-    snapshot.forEach(doc=>{
-        if(doc.data().pontos > maior) maior = doc.data().pontos;
-    });
+    snapshot.forEach(doc => { if(doc.data().pontos > maior) maior = doc.data().pontos; });
 
-    if(total > maior){
-        document.getElementById("mensagem").innerText = "🏆 NOVO RECORDE!";
-    } else {
-        document.getElementById("mensagem").innerText = "Resultado Final";
-    }
+    document.getElementById("mensagem").innerText = total > maior && maior > 0 ? "🏆 NOVO RECORDE!" : "Resultado Final";
 }
 
 function salvarRanking(){
-    db.collection("ranking").add({
-        nome: nome,
-        pontos: total
-    });
-
-    mostrarRanking();
+    db.collection("ranking").add({ nome: nome, pontos: total });
+    alert("Pontuação salva!");
 }
 
 function mostrarRanking(){
-
-    db.collection("ranking")
-    .onSnapshot(snapshot => {
-
-        let lista = [];
-
-        snapshot.forEach(doc=>{
-            lista.push(doc.data());
+    db.collection("ranking").orderBy("pontos", "desc").limit(5).onSnapshot(snapshot => {
+        let html = "<h3>🏆 Ranking Top 5</h3>";
+        snapshot.forEach((doc) => {
+            const r = doc.data();
+            html += `<p>${r.nome} - ${r.pontos} pts</p>`;
         });
-
-        lista.sort((a,b)=> b.pontos - a.pontos);
-
-        let html = "<h3>🏆 Ranking Ao Vivo</h3>";
-
-        lista.slice(0,5).forEach((r,i)=>{
-            html += `<p>${i+1}º - ${r.nome} (${r.pontos})</p>`;
-        });
-
         document.getElementById("ranking").innerHTML = html;
-
     });
-
 }
 
-mostrarRanking();
-
 function reiniciar(){
-    rodada = 1;
-    total = 0;
-
+    rodada = 1; total = 0;
     document.getElementById("resultado").classList.add("hidden");
     document.getElementById("inicio").classList.remove("hidden");
 }
 
-    </script>
+mostrarRanking();
+</script>
     
 </body>
 </html>
